@@ -26,5 +26,19 @@ def get_cf():
     return response.json()
 
 changes = get_cf()["result"]
-print(changes)
-add_to_json(changes, path_to_json)
+#print(changes)
+#add_to_json(changes, path_to_json)
+
+@app.get('/attempts/{handle}')
+def get_attempts(handle: str | None = "SEroshkin"):
+    url = "https://codeforces.com/api/user.status?handle=" + handle + "&count=50"
+    response = requests.get(url)
+    at = response.json()["result"]
+    good = []
+    for attempt in at:
+        if attempt["verdict"] == "OK":
+            good.append(attempt)
+    add_to_json(good, path_to_json)
+    return good
+
+get_attempts("Tim07")

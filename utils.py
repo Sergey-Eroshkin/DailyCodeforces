@@ -27,7 +27,7 @@ def add_to_json(dict_list, filename):
             json_str = file.read()
             if(json_str):
                 data.append(json.loads(json_str))
-            print("data: ", data, "list: ", dict_list)
+            #print("data: ", data, "list: ", dict_list)
             for i in dict_list:
                 data.append(i)
         dict_list_to_json(data, filename)
