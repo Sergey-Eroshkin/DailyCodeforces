@@ -20,14 +20,11 @@ def get_me():
 def home():
     return 'Hello World'
 
-def get_cf():
-    url = "https://codeforces.com/api/user.rating?handle=SEroshkin"
+@app.get('/rating/{handle}')
+def get_cf(handle: str | None = "SEroshkin"):
+    url = "https://codeforces.com/api/user.rating?handle=" + handle
     response = requests.get(url)
-    return response.json()
-
-changes = get_cf()["result"]
-#print(changes)
-#add_to_json(changes, path_to_json)
+    return response.json()["result"][-1]['newRating']
 
 @app.get('/attempts/{handle}')
 def get_attempts(handle: str | None = "SEroshkin"):
@@ -41,4 +38,35 @@ def get_attempts(handle: str | None = "SEroshkin"):
     add_to_json(good, path_to_json)
     return good
 
-get_attempts("Tim07")
+#__________________________________
+
+
+
+counter = {}
+
+good = get_attempts("Tim07")
+for g in good:
+    task = g["problem"]
+    if("points" in task):
+        cost = task["points"]
+    else:
+        continue
+    themes = task["tags"]
+    for tag in themes:
+        if(tag in counter):
+            counter[tag][0] += cost
+            counter[tag][1] += 1
+        else:
+            counter[tag] = [0, 0]
+            counter[tag][0] += cost
+            counter[tag][1] += 1
+
+rate = get_cf("Tim07")
+chance = {}
+
+
+
+for tag in counter:
+    chance[tag] = counter[tag][0] / counter[tag][1] / rate
+
+print(chance)
