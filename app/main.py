@@ -44,7 +44,6 @@ def get_attempts(handle: str | None = "SEroshkin"):
 #__________________________________
 
 
-<<<<<<< HEAD
 def get_counter(handle: str | None = "SEroshkin"):
     counter = {}
     good = get_attempts(handle)
@@ -75,6 +74,11 @@ def get_chance(handle: str | None = "SEroshkin"):
 
 #__________________________________
 
+def get_contest(Id):
+    url = "https://codeforces.com/api/contest.standings?contestId=" + str(Id)
+    response = requests.get(url)
+    ct = response.json()['result']["contest"]['name']
+    return ct
 
 def get_tasks():
     url = "https://codeforces.com/api/problemset.problems"
@@ -111,8 +115,10 @@ def DAY(handle: str | None = "SEroshkin"):
 
     sorted(daily, key=lambda t: t[1], reverse=True)
     answer = []
+    contest = []
     for i in range(3):
-        answer.append(daily[i][0]['name'])
+        contest.append(get_contest(daily[i][0]['contestId']))
+        answer.append(daily[i][0]['name'] + ' - ' + str(contest[i]))
     return answer
 
 print(DAY("--S"))
