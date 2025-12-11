@@ -5,3 +5,6 @@ It was originally created as a repository for work on the Introduction to Projec
 
 By:
 Sergey-Eroshkin
+skalaser
+VladislavAvdeev07
+Tim07
