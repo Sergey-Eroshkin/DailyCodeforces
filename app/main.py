@@ -86,39 +86,56 @@ def get_tasks():
     t = response.json()['result']["problems"]
     return t
 
-@app.get('/tasks/{handle}')
-def DAY(handle: str | None = "SEroshkin"):
+
+def get_recommendations(handle: str | None = "SEroshkin", limit: int = 3):
+    """Возвращает список рекомендованных задач с расширенной информацией."""
     daily = []
-    get_tasks()
     solved = get_attempts(handle)
     chance = get_chance(handle)
     rate = get_cf(handle)
+
     for task in get_tasks():
         flag = 0
         for sub in solved:
-            if(task == sub["problem"]):
+            if task == sub["problem"]:
                 flag = 1
                 break
-        if(flag == 1): continue
+        if flag == 1:
+            continue
         tags = task["tags"]
-        if("rating" in task):
+        if ("rating" in task):
             cost = task["rating"]
         else:
             continue
         diff = []
         for tag in tags:
-            if(tag in chance):
+            if (tag in chance):
                 new_cost = chance[tag] * cost
                 diff.append(abs(new_cost - rate))
-        if(len(diff) != 0 and sum(diff) / len(diff) <= CONST):
+        if (len(diff) != 0 and sum(diff) / len(diff) <= CONST):
             daily.append([task, sum(diff) / len(diff)])
 
-    sorted(daily, key=lambda t: t[1], reverse=True)
+    daily = sorted(daily, key=lambda t: t[1], reverse=True)
     answer = []
-    contest = []
-    for i in range(3):
-        contest.append(get_contest(daily[i][0]['contestId']))
-        answer.append(daily[i][0]['name'] + ' - ' + str(contest[i]))
+    limit = max(1, limit)
+    limit = min(limit, len(daily))
+    for i in range(limit):
+        contest_name = get_contest(daily[i][0]['contestId'])
+        task = daily[i][0]
+        answer.append({
+            "name": task['name'],
+            "contest": str(contest_name),
+            "rating": task.get("rating", "-"),
+            "tags": task.get("tags", []),
+            "link": f"https://codeforces.com/problemset/problem/{task['contestId']}/{task['index']}"
+        })
     return answer
 
-print(DAY("--S"))
+@app.get('/tasks/{handle}')
+def DAY(handle: str | None = "SEroshkin"):
+    # Оставляем строковый формат для обратной совместимости API
+    recs = get_recommendations(handle)
+    return [f"{r['name']} - {r['contest']}" for r in recs]
+
+if __name__ == "__main__":
+    print(DAY("--S"))
